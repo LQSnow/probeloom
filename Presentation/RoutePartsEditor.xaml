@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="ProbeLoom.Presentation.RoutePartsEditor"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ProbeLoom.Presentation">
+    <Grid Width="620" MinHeight="220" MaxHeight="420" RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <TextBlock
+                VerticalAlignment="Center"
+                Style="{StaticResource ProbeLoomCaptionStyle}"
+                Text="启用的片段按从上到下的顺序追加到 Environment Base URL。" />
+            <Button
+                HorizontalAlignment="Right"
+                Style="{StaticResource ProbeLoomCompactButtonStyle}"
+                Click="Add_Click"
+                Content="+ 添加片段" />
+        </Grid>
+        <ListView
+            x:Name="PartsList"
+            Grid.Row="1"
+            SelectionMode="None">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid MinHeight="36" ColumnSpacing="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="28" />
+                            <ColumnDefinition Width="28" />
+                            <ColumnDefinition Width="28" />
+                        </Grid.ColumnDefinitions>
+                        <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
+                        <TextBox Grid.Column="1" Style="{StaticResource ProbeLoomInlineTextBoxStyle}" PlaceholderText="来源名称" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Grid.Column="2" Style="{StaticResource ProbeLoomInlineTextBoxStyle}" local:VariableDropBehavior.IsEnabled="True" FontFamily="Cascadia Mono, Consolas" PlaceholderText="/api" Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="3" Style="{StaticResource ProbeLoomSubtleIconButtonStyle}" AutomationProperties.Name="上移" Click="MoveUp_Click" Content="&#xE74A;" />
+                        <Button Grid.Column="4" Style="{StaticResource ProbeLoomSubtleIconButtonStyle}" AutomationProperties.Name="下移" Click="MoveDown_Click" Content="&#xE74B;" />
+                        <Button Grid.Column="5" Style="{StaticResource ProbeLoomSubtleIconButtonStyle}" AutomationProperties.Name="删除 Route Part" Click="Delete_Click" Content="&#xE74D;" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</UserControl>

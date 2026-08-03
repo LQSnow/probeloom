@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="ProbeLoom.Presentation.RequestEditorPane"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ProbeLoom.Presentation">
+    <UserControl.Resources>
+        <DataTemplate x:Key="RequestFieldTemplate">
+            <Grid
+                MinHeight="32"
+                Padding="2,1"
+                ColumnSpacing="5"
+                KeyDown="FieldRow_KeyDown">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="28" />
+                    <ColumnDefinition Width="0.75*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="28" />
+                </Grid.ColumnDefinitions>
+                <CheckBox
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    AutomationProperties.Name="启用字段"
+                    IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                    Checked="FieldChanged"
+                    Unchecked="FieldChanged" />
+                <TextBox
+                    Grid.Column="1"
+                    Style="{StaticResource ProbeLoomInlineTextBoxStyle}"
+                    local:VariableDropBehavior.IsEnabled="True"
+                    AutomationProperties.Name="字段名称"
+                    PlaceholderText="名称"
+                    Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    TextChanged="FieldTextChanged" />
+                <TextBox
+                    Grid.Column="2"
+                    Style="{StaticResource ProbeLoomInlineTextBoxStyle}"
+                    local:VariableDropBehavior.IsEnabled="True"
+                    AutomationProperties.Name="字段值"
+                    PlaceholderText="值"
+                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    TextChanged="FieldTextChanged" />
+                <TextBox
+                    Grid.Column="3"
+                    Style="{StaticResource ProbeLoomInlineTextBoxStyle}"
+                    AutomationProperties.Name="字段说明"
+                    PlaceholderText="说明（文档）"
+                    Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    TextChanged="FieldTextChanged" />
+                <Button
+                    Grid.Column="4"
+                    Style="{StaticResource ProbeLoomSubtleIconButtonStyle}"
+                    AutomationProperties.Name="删除字段"
+                    Click="RemoveField_Click"
+                    Content="&#xE74D;"
+                    ToolTipService.ToolTip="删除字段（Delete）" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid Background="{ThemeResource ProbeLoomCanvasBrush}">
+        <Grid
+            x:Name="EditorContent"
+            Padding="16,12,16,10"
+            RowSpacing="10"
+            Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="1">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <TextBlock
+                            x:Name="RequestNameText"
+                            FontSize="17"
+                            FontWeight="SemiBold"
+                            Text="Endpoint" />
+                        <Border
+                            Padding="6,2"
+                            VerticalAlignment="Center"
+                            Background="{ThemeResource ProbeLoomSubtleFillBrush}"
+                            CornerRadius="4">
+                            <TextBlock
+                                x:Name="RequestKindText"
+                                FontSize="10"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="ENDPOINT" />
+                        </Border>
+                        <Border
+                            x:Name="CompactValidationStatus"
+                            Padding="6,2"
+                            VerticalAlignment="Center"
+                            Background="{ThemeResource ProbeLoomSubtleFillBrush}"
+                            CornerRadius="4"
+                            Visibility="Collapsed">
+                            <TextBlock
+                                x:Name="CompactValidationStatusText"
+                                FontSize="10"
+                                Text="Ready" />
+                        </Border>
+                    </StackPanel>
+                    <TextBlock
+                        x:Name="RequestContextText"
+                        Style="{StaticResource ProbeLoomCaptionStyle}"
+                        Text="当前请求定义" />
+                </StackPanel>
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ProbeLoomCaptionStyle}"
+                    Text="Timeout" />
+                <NumberBox
+                    x:Name="TimeoutNumberBox"
+                    Grid.Column="2"
+                    Width="82"
+                    MinHeight="32"
+                    AutomationProperties.Name="请求超时秒数"
+                    Maximum="600"
+                    Minimum="1"
+                    SmallChange="1"
+                    SpinButtonPlacementMode="Compact"
+                    Value="30" />
+                <Button
+                    x:Name="ValidateButton"
+                    Grid.Column="3"
+                    Style="{StaticResource ProbeLoomCompactButtonStyle}"
+                    AutomationProperties.Name="校验请求定义"
+                    Click="ValidateButton_Click"
+                    Content="校验请求"
+                    ToolTipService.ToolTip="校验 URL、Headers 和 JSON（F5）" />
+                <Button
+                    x:Name="CancelButton"
+                    Grid.Column="4"
+                    Style="{StaticResource ProbeLoomCompactButtonStyle}"
+                    AutomationProperties.Name="取消 HTTP 请求"
+                    Click="CancelButton_Click"
+                    Content="取消"
+                    IsEnabled="False"
+                    Visibility="Collapsed" />
+                <Button
+                    x:Name="SendButton"
+                    Grid.Column="5"
+                    Style="{StaticResource AccentButtonStyle}"
+                    AutomationProperties.Name="发送 HTTP 请求"
+                    Click="SendButton_Click"
+                    Content="发送"
+                    ToolTipService.ToolTip="发送当前请求（Ctrl+Enter）">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Enter" Modifiers="Control" />
+                    </Button.KeyboardAccelerators>
+                </Button>
+            </Grid>
+
+            <Border
+                Grid.Row="1"
+                Style="{StaticResource ProbeLoomSurfaceCardStyle}"
+                Padding="10">
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="112" />
+                            <ColumnDefinition Width="0.8*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    <ComboBox
+                        x:Name="MethodComboBox"
+                        MinHeight="34"
+                        AutomationProperties.Name="HTTP Method"
+                        SelectionChanged="MethodComboBox_SelectionChanged" />
+                    <TextBox
+                        x:Name="RoutePrefixTextBox"
+                        Grid.Column="1"
+                        MinHeight="34"
+                        Style="{StaticResource ProbeLoomCompactTextBoxStyle}"
+                        AutomationProperties.Name="Inherited route prefix"
+                        FontFamily="Cascadia Mono, Consolas"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        IsReadOnly="True"
+                        PlaceholderText="Route Parts / Group Prefix" />
+                    <TextBox
+                        x:Name="RouteTextBox"
+                        Grid.Column="2"
+                        MinHeight="34"
+                        Style="{StaticResource ProbeLoomCompactTextBoxStyle}"
+                        local:VariableDropBehavior.IsEnabled="True"
+                        AutomationProperties.Name="Route"
+                        FontFamily="Cascadia Mono, Consolas"
+                        PlaceholderText="/v1/resource/{id}"
+                        TextChanged="RouteTextBox_TextChanged" />
+                </Grid>
+            </Border>
+
+            <InfoBar
+                x:Name="ValidationInfoBar"
+                Grid.Row="2"
+                IsClosable="True"
+                IsOpen="False"
+                Severity="Error"
+                Title="请求定义需要修正">
+                <InfoBar.Content>
+                    <ItemsControl x:Name="ValidationIssuesItems">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Margin="0,1"
+                                    Text="{Binding}"
+                                    TextWrapping="Wrap" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </InfoBar.Content>
+            </InfoBar>
+
+            <Grid Grid.Row="3" RowSpacing="6">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="34" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                        <ToggleButton
+                            x:Name="ParamsTab"
+                            Style="{StaticResource ProbeLoomSectionTabStyle}"
+                            AutomationProperties.Name="Query Parameters"
+                            Click="SectionTab_Click"
+                            Content="Params"
+                            IsChecked="True" />
+                        <ToggleButton
+                            x:Name="PathTab"
+                            Style="{StaticResource ProbeLoomSectionTabStyle}"
+                            AutomationProperties.Name="Path Parameters"
+                            Click="SectionTab_Click"
+                            Content="Path" />
+                        <ToggleButton
+                            x:Name="HeadersTab"
+                            Style="{StaticResource ProbeLoomSectionTabStyle}"
+                            AutomationProperties.Name="Headers"
+                            Click="SectionTab_Click"
+                            Content="Headers" />
+                        <ToggleButton
+                            x:Name="BodyTab"
+                            Style="{StaticResource ProbeLoomSectionTabStyle}"
+                            AutomationProperties.Name="Raw JSON Body"
+                            Click="SectionTab_Click"
+                            Content="Body" />
+                        <ToggleButton
+                            x:Name="AuthTab"
+                            Style="{StaticResource ProbeLoomSectionTabStyle}"
+                            AutomationProperties.Name="Authentication"
+                            Click="SectionTab_Click"
+                            Content="Auth" />
+                    </StackPanel>
+                    <Button
+                        x:Name="AddActiveFieldButton"
+                        HorizontalAlignment="Right"
+                        Style="{StaticResource ProbeLoomCompactButtonStyle}"
+                        Click="AddActiveField_Click"
+                        Content="+ 添加参数" />
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <Grid x:Name="ParamsPanel" MinHeight="86" RowSpacing="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="26" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Padding="2,0" ColumnSpacing="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="0.75*" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="28" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="1" Style="{StaticResource ProbeLoomCaptionStyle}" Text="名称" />
+                            <TextBlock Grid.Column="2" Style="{StaticResource ProbeLoomCaptionStyle}" Text="值" />
+                            <TextBlock Grid.Column="3" Style="{StaticResource ProbeLoomCaptionStyle}" Text="说明" />
+                        </Grid>
+                        <ListView
+                            x:Name="QueryListView"
+                            Grid.Row="1"
+                            AllowDrop="True"
+                            CanDragItems="True"
+                            CanReorderItems="True"
+                            DragItemsCompleted="QueryListView_DragItemsCompleted"
+                            IsItemClickEnabled="False"
+                            ItemTemplate="{StaticResource RequestFieldTemplate}"
+                            ReorderMode="Enabled"
+                            SelectionMode="None" />
+                    </Grid>
+
+                    <Grid x:Name="HeadersPanel" MinHeight="86" RowSpacing="4" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="26" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Padding="2,0" ColumnSpacing="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="0.75*" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="28" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="1" Style="{StaticResource ProbeLoomCaptionStyle}" Text="Header" />
+                            <TextBlock Grid.Column="2" Style="{StaticResource ProbeLoomCaptionStyle}" Text="值" />
+                            <TextBlock Grid.Column="3" Style="{StaticResource ProbeLoomCaptionStyle}" Text="说明" />
+                        </Grid>
+                        <ListView
+                            x:Name="HeaderListView"
+                            Grid.Row="1"
+                            IsItemClickEnabled="False"
+                            ItemTemplate="{StaticResource RequestFieldTemplate}"
+                            SelectionMode="None" />
+                    </Grid>
+
+                    <Grid x:Name="PathPanel" MinHeight="86" RowSpacing="4" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="26" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Padding="2,0" ColumnSpacing="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="0.75*" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="28" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="1" Style="{StaticResource ProbeLoomCaptionStyle}" Text="占位符名称" />
+                            <TextBlock Grid.Column="2" Style="{StaticResource ProbeLoomCaptionStyle}" Text="替换值" />
+                            <TextBlock Grid.Column="3" Style="{StaticResource ProbeLoomCaptionStyle}" Text="说明" />
+                        </Grid>
+                        <ListView
+                            x:Name="PathListView"
+                            Grid.Row="1"
+                            IsItemClickEnabled="False"
+                            ItemTemplate="{StaticResource RequestFieldTemplate}"
+                            SelectionMode="None" />
+                    </Grid>
+
+                    <Grid x:Name="BodyPanel" RowSpacing="6" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Style="{StaticResource ProbeLoomCaptionStyle}"
+                                Text="Raw JSON" />
+                            <StackPanel
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal"
+                                Spacing="6">
+                                <Button
+                                    x:Name="JsonCompletionButton"
+                                    Style="{StaticResource ProbeLoomCompactButtonStyle}"
+                                    AutomationProperties.Name="JSON 补全"
+                                    Click="JsonCompletionButton_Click"
+                                    Content="补全"
+                                    ToolTipService.ToolTip="显示上下文补全（Ctrl+Space）">
+                                    <Button.KeyboardAccelerators>
+                                        <KeyboardAccelerator Key="Space" Modifiers="Control" />
+                                    </Button.KeyboardAccelerators>
+                                </Button>
+                                <Button
+                                    Style="{StaticResource ProbeLoomCompactButtonStyle}"
+                                    Click="FormatJson_Click"
+                                    Content="格式化 JSON" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBox
+                            x:Name="BodyTextBox"
+                            Grid.Row="1"
+                            MinHeight="72"
+                            AcceptsReturn="True"
+                            local:VariableDropBehavior.IsEnabled="True"
+                            AutomationProperties.Name="Raw JSON Body"
+                            FontFamily="Cascadia Mono, Consolas"
+                            FontSize="13"
+                            IsSpellCheckEnabled="False"
+                            Padding="10,8"
+                            PlaceholderText="输入 Raw JSON 请求体"
+                            CharacterReceived="BodyTextBox_CharacterReceived"
+                            PreviewKeyDown="BodyTextBox_PreviewKeyDown"
+                            SelectionChanged="BodyTextBox_SelectionChanged"
+                            TextChanged="BodyTextBox_TextChanged"
+                            TextWrapping="NoWrap"
+                            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                        <Grid Grid.Row="2">
+                            <TextBlock
+                                Style="{StaticResource ProbeLoomCaptionStyle}"
+                                Text="Enter 自动缩进 · Tab 缩进 · Ctrl+Space 补全 · Shift+Alt+F 格式化" />
+                            <TextBlock
+                                x:Name="JsonCaretStatusText"
+                                HorizontalAlignment="Right"
+                                Style="{StaticResource ProbeLoomCaptionStyle}"
+                                Text="Ln 1, Col 1 · Spaces: 2" />
+                        </Grid>
+                    </Grid>
+
+                    <Grid x:Name="AuthPanel" ColumnSpacing="10" RowSpacing="7" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ComboBox
+                            x:Name="AuthenticationKindComboBox"
+                            Header="Authentication"
+                            SelectionChanged="AuthenticationChanged" />
+                        <TextBox
+                            x:Name="BearerTokenTextBox"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            local:VariableDropBehavior.IsEnabled="True"
+                            Header="Bearer Token template"
+                            PlaceholderText="{}Blank uses Environment Token Session; or {{secret.token}}"
+                            TextChanged="AuthenticationTextChanged" />
+                        <TextBox
+                            x:Name="BasicUsernameTextBox"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            local:VariableDropBehavior.IsEnabled="True"
+                            Header="Username"
+                            TextChanged="AuthenticationTextChanged" />
+                        <TextBox
+                            x:Name="BasicPasswordTextBox"
+                            Grid.Row="1"
+                            Grid.Column="2"
+                            local:VariableDropBehavior.IsEnabled="True"
+                            Header="Password template"
+                            PlaceholderText="{}{{basic.password}}"
+                            TextChanged="AuthenticationTextChanged" />
+                        <TextBox
+                            x:Name="ApiKeyNameTextBox"
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            local:VariableDropBehavior.IsEnabled="True"
+                            Header="API Key name"
+                            PlaceholderText="X-API-Key"
+                            TextChanged="AuthenticationTextChanged" />
+                        <TextBox
+                            x:Name="ApiKeyValueTextBox"
+                            Grid.Row="2"
+                            Grid.Column="2"
+                            local:VariableDropBehavior.IsEnabled="True"
+                            Header="API Key value template"
+                            PlaceholderText="{}{{api.key}}"
+                            TextChanged="AuthenticationTextChanged" />
+                        <ComboBox
+                            x:Name="ApiKeyLocationComboBox"
+                            Grid.Row="2"
+                            Header="Location"
+                            SelectionChanged="AuthenticationChanged" />
+                        <CheckBox
+                            x:Name="CaptureTokenCheckBox"
+                            Grid.Row="3"
+                            VerticalAlignment="Bottom"
+                            Content="Capture tokens"
+                            Checked="AuthenticationChanged"
+                            Unchecked="AuthenticationChanged" />
+                        <TextBox
+                            x:Name="AccessTokenPathTextBox"
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Header="Access Token JSON path"
+                            PlaceholderText="$.accessToken"
+                            TextChanged="AuthenticationTextChanged" />
+                        <TextBox
+                            x:Name="RefreshTokenPathTextBox"
+                            Grid.Row="3"
+                            Grid.Column="2"
+                            Header="Refresh Token JSON path"
+                            PlaceholderText="$.refreshToken"
+                            TextChanged="AuthenticationTextChanged" />
+                        <TextBox
+                            x:Name="ExpiresInPathTextBox"
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Header="Expires-in JSON path"
+                            PlaceholderText="$.expiresIn"
+                            TextChanged="AuthenticationTextChanged" />
+                        <TextBox
+                            x:Name="ExpiresAtPathTextBox"
+                            Grid.Row="4"
+                            Grid.Column="2"
+                            Header="Expires-at JSON path (optional)"
+                            PlaceholderText="$.expiresAt"
+                            TextChanged="AuthenticationTextChanged" />
+                    </Grid>
+                </Grid>
+            </Grid>
+
+        </Grid>
+
+        <StackPanel
+            x:Name="EmptyState"
+            Width="360"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="9">
+            <FontIcon
+                HorizontalAlignment="Center"
+                FontSize="34"
+                Glyph="&#xE774;"
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                FontSize="18"
+                FontWeight="SemiBold"
+                Text="选择一个 Endpoint" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="从左侧工作区选择 Endpoint 或 Request Case，&#xA;或者先创建分组和 Endpoint。"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+        </StackPanel>
+    </Grid>
+</UserControl>

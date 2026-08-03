@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="ProbeLoom.Presentation.InspectorPane"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ProbeLoom.Presentation">
+    <UserControl.Resources>
+        <local:BooleanVisibilityConverter x:Key="BoolToVisibility" />
+        <local:InverseBooleanVisibilityConverter x:Key="InverseBoolToVisibility" />
+    </UserControl.Resources>
+
+    <Grid Background="{ThemeResource ProbeLoomSurfaceBrush}">
+        <Grid
+            x:Name="CollapsedRail"
+            Padding="6,8"
+            RowSpacing="6"
+            Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Button
+                x:Name="ExpandButton"
+                Style="{StaticResource ProbeLoomIconButtonStyle}"
+                AutomationProperties.Name="展开 Inspector"
+                Click="Expand_Click"
+                Content="&#xE76C;"
+                ToolTipService.ToolTip="展开 Inspector" />
+            <Button
+                Grid.Row="1"
+                Style="{StaticResource ProbeLoomIconButtonStyle}"
+                AutomationProperties.Name="Route Inspector"
+                Click="CollapsedPage_Click"
+                Content="&#xE774;"
+                Tag="Route"
+                ToolTipService.ToolTip="Route" />
+            <Button
+                Grid.Row="2"
+                Style="{StaticResource ProbeLoomIconButtonStyle}"
+                AutomationProperties.Name="Variables Inspector"
+                Click="CollapsedPage_Click"
+                Content="&#xE8EF;"
+                Tag="Variables"
+                ToolTipService.ToolTip="Variables" />
+            <Button
+                Grid.Row="3"
+                Style="{StaticResource ProbeLoomIconButtonStyle}"
+                AutomationProperties.Name="Authentication Inspector"
+                Click="CollapsedPage_Click"
+                Content="&#xE72E;"
+                Tag="Auth"
+                ToolTipService.ToolTip="Auth" />
+            <Button
+                Grid.Row="4"
+                Style="{StaticResource ProbeLoomIconButtonStyle}"
+                AutomationProperties.Name="Inspect summary"
+                Click="CollapsedPage_Click"
+                Content="&#xE9D9;"
+                Tag="Inspect"
+                ToolTipService.ToolTip="Inspect" />
+            <Button
+                Grid.Row="5"
+                Style="{StaticResource ProbeLoomIconButtonStyle}"
+                AutomationProperties.Name="Diagnostics Inspector"
+                Click="CollapsedPage_Click"
+                Content="&#xE9D9;"
+                Tag="Diagnostics"
+                ToolTipService.ToolTip="Diagnostics" />
+        </Grid>
+
+        <Grid x:Name="ExpandedContent">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="42" />
+                <RowDefinition Height="36" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid
+                Padding="12,0,6,0"
+                BorderBrush="{ThemeResource ProbeLoomSoftStrokeBrush}"
+                BorderThickness="1,0,0,1">
+                <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="7">
+                    <FontIcon
+                        FontSize="13"
+                        Glyph="&#xE946;"
+                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                    <TextBlock
+                        Style="{StaticResource ProbeLoomSectionTitleStyle}"
+                        Text="Inspector" />
+                    <Border
+                        Padding="6,2"
+                        Background="{ThemeResource ProbeLoomSubtleFillBrush}"
+                        CornerRadius="7">
+                        <TextBlock
+                            x:Name="ValidationStatusText"
+                            FontSize="9"
+                            Text="无请求" />
+                    </Border>
+                </StackPanel>
+                <Button
+                    HorizontalAlignment="Right"
+                    Style="{StaticResource ProbeLoomSubtleIconButtonStyle}"
+                    AutomationProperties.Name="收起 Inspector"
+                    Click="Collapse_Click"
+                    Content="&#xE76B;"
+                    ToolTipService.ToolTip="收起 Inspector" />
+            </Grid>
+
+            <Grid
+                Grid.Row="1"
+                Padding="8,0"
+                BorderBrush="{ThemeResource ProbeLoomSoftStrokeBrush}"
+                BorderThickness="1,0,0,1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <ToggleButton
+                    x:Name="RouteTab"
+                    Height="34"
+                    Background="Transparent"
+                    BorderThickness="0,0,0,2"
+                    Click="PageTab_Click"
+                    Content="Route"
+                    IsChecked="True" />
+                <ToggleButton
+                    x:Name="VariablesTab"
+                    Grid.Column="1"
+                    Height="34"
+                    Background="Transparent"
+                    BorderThickness="0,0,0,2"
+                    Click="PageTab_Click"
+                    Content="Vars"
+                    ToolTipService.ToolTip="Variables" />
+                <ToggleButton
+                    x:Name="AuthTab"
+                    Grid.Column="2"
+                    Height="34"
+                    Background="Transparent"
+                    BorderThickness="0,0,0,2"
+                    Click="PageTab_Click"
+                    Content="Auth" />
+                <ToggleButton
+                    x:Name="InspectTab"
+                    Grid.Column="3"
+                    Height="34"
+                    Background="Transparent"
+                    BorderThickness="0,0,0,2"
+                    Click="PageTab_Click"
+                    Content="Inspect" />
+                <ToggleButton
+                    x:Name="DiagnosticsTab"
+                    Grid.Column="4"
+                    Height="34"
+                    Background="Transparent"
+                    BorderThickness="0,0,0,2"
+                    Click="PageTab_Click"
+                    Content="Diag"
+                    ToolTipService.ToolTip="Diagnostics" />
+            </Grid>
+
+            <Grid Grid.Row="2" BorderBrush="{ThemeResource ProbeLoomSoftStrokeBrush}" BorderThickness="1,0,0,0">
+                <ScrollViewer
+                    x:Name="RoutePage"
+                    Padding="12,10"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="5">
+                            <Grid>
+                                <TextBlock Style="{StaticResource ProbeLoomSectionTitleStyle}" Text="最终 URL" />
+                                <Button
+                                    HorizontalAlignment="Right"
+                                    Style="{StaticResource ProbeLoomSubtleIconButtonStyle}"
+                                    AutomationProperties.Name="复制最终 URL"
+                                    Click="CopyFinalUrl_Click"
+                                    Content="&#xE8C8;"
+                                    ToolTipService.ToolTip="复制最终 URL" />
+                            </Grid>
+                            <TextBox
+                                x:Name="FinalUrlTextBox"
+                                Style="{StaticResource ProbeLoomCompactTextBoxStyle}"
+                                AutomationProperties.Name="最终 URL"
+                                FontFamily="Cascadia Mono, Consolas"
+                                FontSize="11"
+                                IsReadOnly="True"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="3">
+                            <TextBlock Style="{StaticResource ProbeLoomSectionTitleStyle}" Text="Route Composition" />
+                            <TextBlock
+                                Style="{StaticResource ProbeLoomCaptionStyle}"
+                                Text="片段顺序来自现有统一 Route 解析结果；选择片段可定位编辑入口。"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <ListView
+                            x:Name="RoutePartsItems"
+                            HorizontalAlignment="Stretch"
+                            AllowDrop="True"
+                            DragLeave="RoutePartsItems_DragLeave"
+                            DragOver="RoutePartsItems_DragOver"
+                            Drop="RoutePartsItems_Drop"
+                            HorizontalContentAlignment="Left"
+                            IsItemClickEnabled="False"
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                            ScrollViewer.HorizontalScrollMode="Disabled"
+                            SelectionMode="None">
+                            <ListView.ItemContainerTransitions>
+                                <TransitionCollection />
+                            </ListView.ItemContainerTransitions>
+                            <ListView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ItemsWrapGrid Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ListView.ItemsPanel>
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                    <Button
+                                        Width="160"
+                                        Margin="0,0,3,7"
+                                        Padding="0"
+                                        HorizontalContentAlignment="Stretch"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        CanDrag="{Binding IsMovable}"
+                                        DragStarting="RoutePart_DragStarting"
+                                        KeyDown="RoutePart_KeyDown"
+                                        AutomationProperties.Name="{Binding AutomationName}"
+                                        Click="RoutePart_Click"
+                                        ToolTipService.ToolTip="{Binding EditToolTip}">
+                                        <Border
+                                            Padding="9,7"
+                                            Background="{ThemeResource ProbeLoomRaisedSurfaceBrush}"
+                                            BorderBrush="{ThemeResource ProbeLoomSoftStrokeBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Opacity="{Binding Opacity}">
+                                            <StackPanel Spacing="2">
+                                                <Grid ColumnSpacing="5">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <FontIcon
+                                                        FontSize="10"
+                                                        Glyph="{Binding Glyph}"
+                                                        Foreground="{Binding StatusBrush}" />
+                                                    <TextBlock
+                                                        Grid.Column="1"
+                                                        Style="{StaticResource ProbeLoomCaptionStyle}"
+                                                        Text="{Binding SourceCaption}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                    <FontIcon
+                                                        Grid.Column="2"
+                                                        FontSize="10"
+                                                        Glyph="{Binding InteractionGlyph}"
+                                                        ToolTipService.ToolTip="{Binding InteractionHint}" />
+                                                </Grid>
+                                                <TextBlock
+                                                    FontFamily="Cascadia Mono, Consolas"
+                                                    FontSize="12"
+                                                    FontWeight="SemiBold"
+                                                    Text="{Binding DisplayValue}"
+                                                    TextTrimming="CharacterEllipsis"
+                                                    ToolTipService.ToolTip="{Binding DisplayValue}" />
+                                                <TextBlock
+                                                    Style="{StaticResource ProbeLoomCaptionStyle}"
+                                                    Text="{Binding TemplateCaption}"
+                                                    TextTrimming="CharacterEllipsis"
+                                                    ToolTipService.ToolTip="{Binding TemplateCaption}"
+                                                    Visibility="{Binding ShowTemplate, Converter={StaticResource BoolToVisibility}}" />
+                                                <TextBlock
+                                                    Style="{StaticResource ProbeLoomCaptionStyle}"
+                                                    Text="{Binding EncodingCaption}"
+                                                    TextTrimming="CharacterEllipsis"
+                                                    ToolTipService.ToolTip="{Binding EncodingCaption}"
+                                                    Visibility="{Binding ShowEncoding, Converter={StaticResource BoolToVisibility}}" />
+                                                <TextBlock
+                                                    Foreground="{ThemeResource ProbeLoomDangerBrush}"
+                                                    FontSize="10"
+                                                    Text="{Binding StatusMessage}"
+                                                    TextWrapping="Wrap"
+                                                    Visibility="{Binding HasStatus, Converter={StaticResource BoolToVisibility}}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <TextBlock
+                            x:Name="RouteDropHintText"
+                            Style="{StaticResource ProbeLoomCaptionStyle}"
+                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                            Visibility="Collapsed" />
+
+                        <StackPanel
+                            x:Name="RouteEmptyState"
+                            Margin="0,30"
+                            HorizontalAlignment="Center"
+                            Spacing="5">
+                            <FontIcon HorizontalAlignment="Center" FontSize="22" Glyph="&#xE774;" />
+                            <TextBlock HorizontalAlignment="Center" FontWeight="SemiBold" Text="选择一个请求" />
+                            <TextBlock
+                                Style="{StaticResource ProbeLoomCaptionStyle}"
+                                Text="选择 Endpoint 或 Request Case 后查看组合路径。"
+                                TextAlignment="Center"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Grid x:Name="VariablesPage" Padding="12,10" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Spacing="3">
+                        <Grid>
+                            <TextBlock Style="{StaticResource ProbeLoomSectionTitleStyle}" Text="当前请求变量" />
+                            <Button
+                                HorizontalAlignment="Right"
+                                Style="{StaticResource ProbeLoomCompactButtonStyle}"
+                                Click="ManageVariables_Click"
+                                Content="+ 新建 / 管理" />
+                        </Grid>
+                        <TextBlock
+                            Style="{StaticResource ProbeLoomCaptionStyle}"
+                            Text="拖动变量积木到 Base URL、Route、Params、Path、Headers 或 Body 的光标位置。Secret 只插入引用，不暴露值。"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ListView
+                        x:Name="VariableBlocksItems"
+                        Grid.Row="1"
+                        Margin="0,9,0,3"
+                        MaxHeight="132"
+                        SelectionMode="None"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListView.ItemContainerTransitions>
+                            <TransitionCollection />
+                        </ListView.ItemContainerTransitions>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    Margin="0,0,0,5"
+                                    Padding="8,6"
+                                    CanDrag="True"
+                                    DragStarting="VariableBlock_DragStarting"
+                                    Background="{ThemeResource ProbeLoomVariableFillBrush}"
+                                    BorderBrush="{ThemeResource ProbeLoomVariableBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="5"
+                                    AutomationProperties.Name="{Binding AutomationName}"
+                                    ToolTipService.ToolTip="{Binding ToolTip}">
+                                    <Grid ColumnSpacing="6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <FontIcon
+                                            FontSize="10"
+                                            Glyph="&#xE76F;"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontFamily="Cascadia Mono, Consolas"
+                                            FontSize="11"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource ProbeLoomVariableBrush}"
+                                            Text="{Binding Reference}"
+                                            TextWrapping="Wrap" />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            Style="{StaticResource ProbeLoomCaptionStyle}"
+                                            Text="SECRET"
+                                            Visibility="{Binding IsSecret, Converter={StaticResource BoolToVisibility}}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <ListView
+                        x:Name="VariablesList"
+                        Grid.Row="2"
+                        Margin="0,8,0,0"
+                        SelectionMode="None">
+                        <ListView.ItemContainerTransitions>
+                            <TransitionCollection />
+                        </ListView.ItemContainerTransitions>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid MinHeight="54" Padding="3,4" ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="1">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="12" FontWeight="SemiBold" Text="{Binding Name}" TextWrapping="Wrap" />
+                                            <TextBlock
+                                                Style="{StaticResource ProbeLoomCaptionStyle}"
+                                                Text="SECRET"
+                                                Visibility="{Binding IsSecret, Converter={StaticResource BoolToVisibility}}" />
+                                        </StackPanel>
+                                        <TextBlock Style="{StaticResource ProbeLoomCaptionStyle}" Text="{Binding Source}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Source}" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource ProbeLoomDangerBrush}"
+                                            FontSize="10"
+                                            Text="{Binding Detail}"
+                                            TextWrapping="Wrap"
+                                            Visibility="{Binding HasDetail, Converter={StaticResource BoolToVisibility}}" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Cascadia Mono, Consolas"
+                                        FontSize="11"
+                                        Text="{Binding DisplayValue}"
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTipService.ToolTip="{Binding DisplayValue}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+
+                <ScrollViewer
+                    x:Name="AuthPage"
+                    Padding="12,10"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto"
+                    Visibility="Collapsed">
+                    <StackPanel Spacing="10">
+                        <TextBlock Style="{StaticResource ProbeLoomSectionTitleStyle}" Text="最终 Authentication" />
+                        <Border Style="{StaticResource ProbeLoomSurfaceCardStyle}" Padding="11,9">
+                            <StackPanel Spacing="4">
+                                <TextBlock x:Name="AuthMethodText" FontSize="14" FontWeight="SemiBold" Text="No Auth" />
+                                <TextBlock x:Name="AuthSourceText" Style="{StaticResource ProbeLoomCaptionStyle}" />
+                            </StackPanel>
+                        </Border>
+                        <Grid ColumnSpacing="8" RowSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Border Style="{StaticResource ProbeLoomSurfaceCardStyle}" Padding="9,7">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource ProbeLoomCaptionStyle}" Text="TOKEN" />
+                                    <TextBlock x:Name="TokenExistsText" FontWeight="SemiBold" Text="未设置" />
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="1" Style="{StaticResource ProbeLoomSurfaceCardStyle}" Padding="9,7">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource ProbeLoomCaptionStyle}" Text="EXPIRY" />
+                                    <TextBlock x:Name="TokenExpiryText" FontWeight="SemiBold" Text="未知" />
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource ProbeLoomSurfaceCardStyle}" Padding="9,7">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource ProbeLoomCaptionStyle}" Text="REFRESH" />
+                                    <TextBlock x:Name="RefreshConfiguredText" FontWeight="SemiBold" Text="未配置" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        <TextBlock
+                            x:Name="TokenStatusText"
+                            Style="{StaticResource ProbeLoomCaptionStyle}"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            Style="{StaticResource ProbeLoomCaptionStyle}"
+                            Text="Inspector 不显示 Access Token、Refresh Token、Password 或 API Key 的真实值。"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </ScrollViewer>
+
+                <ScrollViewer
+                    x:Name="InspectPage"
+                    Padding="12,10"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto"
+                    Visibility="Collapsed">
+                    <StackPanel Spacing="10">
+                        <Grid>
+                            <TextBlock Style="{StaticResource ProbeLoomSectionTitleStyle}" Text="最终请求快照（已掩码）" />
+                            <Button
+                                HorizontalAlignment="Right"
+                                Style="{StaticResource ProbeLoomSubtleIconButtonStyle}"
+                                AutomationProperties.Name="复制掩码 curl 命令"
+                                Click="CopyCurl_Click"
+                                Content="&#xE8C8;"
+                                ToolTipService.ToolTip="复制 PowerShell curl（敏感值已掩码）" />
+                        </Grid>
+                        <Border Style="{StaticResource ProbeLoomSurfaceCardStyle}" Padding="11,9">
+                            <StackPanel Spacing="5">
+                                <TextBlock x:Name="InspectMethodText" FontFamily="Cascadia Mono, Consolas" FontWeight="SemiBold" />
+                                <TextBlock x:Name="InspectUrlText" FontFamily="Cascadia Mono, Consolas" FontSize="11" TextWrapping="Wrap" />
+                                <TextBlock x:Name="InspectCountsText" Style="{StaticResource ProbeLoomCaptionStyle}" />
+                                <TextBlock x:Name="InspectAuthText" Style="{StaticResource ProbeLoomCaptionStyle}" TextWrapping="Wrap" />
+                                <TextBlock x:Name="InspectTimingText" Style="{StaticResource ProbeLoomCaptionStyle}" />
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Style="{StaticResource ProbeLoomSectionTitleStyle}" Text="最终 Headers" />
+                        <ItemsControl x:Name="InspectHeadersItems">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2" ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="{Binding Name}" />
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock FontFamily="Cascadia Mono, Consolas" FontSize="11" Text="{Binding Value}" TextWrapping="Wrap" />
+                                            <TextBlock Style="{StaticResource ProbeLoomCaptionStyle}" Text="{Binding Source}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Style="{StaticResource ProbeLoomSectionTitleStyle}" Text="最终 Body" />
+                        <TextBlock
+                            x:Name="InspectBodySourceText"
+                            Style="{StaticResource ProbeLoomCaptionStyle}"
+                            TextWrapping="Wrap" />
+                        <TextBox
+                            x:Name="InspectBodyText"
+                            MinHeight="72"
+                            MaxHeight="180"
+                            AcceptsReturn="True"
+                            FontFamily="Cascadia Mono, Consolas"
+                            FontSize="11"
+                            IsReadOnly="True"
+                            TextWrapping="Wrap"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                        <TextBlock Style="{StaticResource ProbeLoomSectionTitleStyle}" Text="PowerShell curl（已掩码）" />
+                        <TextBox
+                            x:Name="InspectCurlText"
+                            MinHeight="90"
+                            AcceptsReturn="True"
+                            FontFamily="Cascadia Mono, Consolas"
+                            FontSize="11"
+                            IsReadOnly="True"
+                            TextWrapping="Wrap"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                        <TextBlock Style="{StaticResource ProbeLoomSectionTitleStyle}" Text="Validation" />
+                        <ItemsControl x:Name="ValidationMessagesItems">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Margin="0,2" Text="{Binding}" TextWrapping="Wrap" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <ScrollViewer
+                    x:Name="DiagnosticsPage"
+                    Padding="12,10"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto"
+                    Visibility="Collapsed">
+                    <StackPanel Spacing="10">
+                        <Grid ColumnSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource ProbeLoomSectionTitleStyle}" Text="分阶段网络诊断" />
+                                <TextBlock Style="{StaticResource ProbeLoomCaptionStyle}" Text="独立执行，不影响普通发送。" />
+                            </StackPanel>
+                            <Button
+                                x:Name="RunDiagnosticsButton"
+                                Grid.Column="1"
+                                Click="RunDiagnostics_Click"
+                                Content="开始诊断" />
+                            <Button
+                                x:Name="CancelDiagnosticsButton"
+                                Grid.Column="2"
+                                Click="CancelDiagnostics_Click"
+                                Content="取消"
+                                IsEnabled="False" />
+                        </Grid>
+                        <CheckBox
+                            x:Name="IncludeUnsafeHttpCheckBox"
+                            Content="同时执行当前 HTTP 请求（POST、PATCH、DELETE 等可能产生副作用）"
+                            IsChecked="False"
+                            ToolTipService.ToolTip="默认只对 GET、HEAD 和 OPTIONS 执行 HTTP 阶段；勾选后会真实发送当前请求。" />
+                        <TextBlock x:Name="DiagnosticsStatusText" Text="尚未运行详细诊断。" TextWrapping="Wrap" />
+                        <TextBox
+                            x:Name="DiagnosticsOutputText"
+                            MinHeight="260"
+                            AcceptsReturn="True"
+                            FontFamily="Cascadia Mono, Consolas"
+                            FontSize="11"
+                            IsReadOnly="True"
+                            TextWrapping="Wrap"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                        <Button
+                            HorizontalAlignment="Left"
+                            Click="CopyDiagnostics_Click"
+                            Content="复制诊断摘要" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

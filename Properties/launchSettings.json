@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ProbeLoom (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ProbeLoom (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

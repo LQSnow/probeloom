@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="ProbeLoom.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:ProbeLoom.Presentation"
+    Background="{ThemeResource ProbeLoomCanvasBrush}"
+    KeyDown="Page_KeyDown"
+    Loaded="Page_Loaded"
+    SizeChanged="Page_SizeChanged">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="44" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <CommandBar
+            Grid.Row="0"
+            Padding="5,0"
+            Background="{ThemeResource ProbeLoomSurfaceBrush}"
+            BorderBrush="{ThemeResource ProbeLoomSoftStrokeBrush}"
+            BorderThickness="0,0,0,1"
+            DefaultLabelPosition="Right"
+            IsDynamicOverflowEnabled="True">
+            <AppBarButton
+                Click="NewProject_Click"
+                Icon="Page"
+                KeyboardAcceleratorPlacementMode="Hidden"
+                Label="新建项目">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="N" Modifiers="Control,Shift" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+            <AppBarButton
+                Click="OpenProject_Click"
+                Icon="OpenFile"
+                KeyboardAcceleratorPlacementMode="Hidden"
+                Label="打开">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="O" Modifiers="Control" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+            <AppBarSeparator />
+            <AppBarButton
+                x:Name="SaveButton"
+                Click="SaveProject_Click"
+                Icon="Save"
+                IsEnabled="False"
+                KeyboardAcceleratorPlacementMode="Hidden"
+                Label="保存">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="S" Modifiers="Control" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+            <AppBarButton
+                x:Name="SaveAsButton"
+                Click="SaveProjectAs_Click"
+                Icon="SaveLocal"
+                IsEnabled="False"
+                KeyboardAcceleratorPlacementMode="Hidden"
+                Label="另存为">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+            <AppBarSeparator />
+            <AppBarButton
+                x:Name="NewEndpointButton"
+                Click="NewEndpoint_Click"
+                Icon="Add"
+                IsEnabled="False"
+                KeyboardAcceleratorPlacementMode="Hidden"
+                Label="新建 Endpoint">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="N" Modifiers="Control" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
+            <AppBarButton
+                x:Name="NewCaseButton"
+                Click="NewRequestCase_Click"
+                Icon="Copy"
+                IsEnabled="False"
+                Label="新建 Case" />
+            <AppBarSeparator />
+            <AppBarToggleButton
+                x:Name="RequestWorkspaceButton"
+                Click="RequestWorkspace_Click"
+                Icon="Edit"
+                Label="Request" />
+            <AppBarToggleButton
+                x:Name="RouteMapButton"
+                Click="RouteMap_Click"
+                Icon="Map"
+                Label="Route Map" />
+            <AppBarToggleButton
+                x:Name="DocumentationButton"
+                Click="Documentation_Click"
+                Icon="Document"
+                Label="Documentation" />
+        </CommandBar>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="NavigationColumn" Width="292" MinWidth="224" MaxWidth="460" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" MinWidth="600" />
+            </Grid.ColumnDefinitions>
+
+            <controls:WorkspacePane
+                x:Name="WorkspacePane"
+                Grid.Column="0"
+                CommandRequested="WorkspacePane_CommandRequested"
+                NodeInvoked="WorkspacePane_NodeInvoked" />
+
+            <Thumb
+                Grid.Column="1"
+                HorizontalAlignment="Stretch"
+                AutomationProperties.Name="调整工作区宽度"
+                Background="Transparent"
+                DragDelta="NavigationSplitter_DragDelta">
+                <Thumb.Template>
+                    <ControlTemplate TargetType="Thumb">
+                        <Grid Background="Transparent">
+                            <Border
+                                Width="1"
+                                HorizontalAlignment="Center"
+                                Background="{ThemeResource ProbeLoomSoftStrokeBrush}" />
+                        </Grid>
+                    </ControlTemplate>
+                </Thumb.Template>
+            </Thumb>
+
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" MinHeight="270" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition x:Name="DiagnosticsRow" Height="220" MinHeight="170" MaxHeight="520" />
+                </Grid.RowDefinitions>
+
+                <Border
+                    Grid.Row="0"
+                    Padding="14,8"
+                    Background="{ThemeResource ProbeLoomSurfaceBrush}"
+                    BorderBrush="{ThemeResource ProbeLoomSoftStrokeBrush}"
+                    BorderThickness="1,0,0,1">
+                    <Grid ColumnSpacing="8" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="160" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32" />
+                            <RowDefinition Height="34" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Style="{StaticResource ProbeLoomCaptionStyle}"
+                            Text="Environment" />
+                        <ComboBox
+                            x:Name="EnvironmentComboBox"
+                            Grid.Column="1"
+                            Style="{StaticResource ProbeLoomCompactComboBoxStyle}"
+                            HorizontalAlignment="Stretch"
+                            DisplayMemberPath="Name"
+                            SelectionChanged="EnvironmentComboBox_SelectionChanged" />
+                        <Button
+                            x:Name="AddEnvironmentButton"
+                            Grid.Column="2"
+                            Style="{StaticResource ProbeLoomIconButtonStyle}"
+                            AutomationProperties.Name="新建 Environment"
+                            Click="AddEnvironment_Click"
+                            Content="&#xE710;"
+                            IsEnabled="False"
+                            ToolTipService.ToolTip="新建 Environment" />
+                        <Button
+                            x:Name="EditEnvironmentButton"
+                            Grid.Column="3"
+                            Style="{StaticResource ProbeLoomIconButtonStyle}"
+                            AutomationProperties.Name="编辑 Environment"
+                            Click="EditEnvironment_Click"
+                            Content="&#xE70F;"
+                            IsEnabled="False"
+                            ToolTipService.ToolTip="编辑 Environment" />
+                        <Button
+                            x:Name="DeleteEnvironmentButton"
+                            Grid.Column="4"
+                            Style="{StaticResource ProbeLoomIconButtonStyle}"
+                            AutomationProperties.Name="删除 Environment"
+                            Click="DeleteEnvironment_Click"
+                            Content="&#xE74D;"
+                            IsEnabled="False"
+                            ToolTipService.ToolTip="删除 Environment" />
+                        <Button
+                            x:Name="ProjectRoutesButton"
+                            Grid.Column="5"
+                            Style="{StaticResource ProbeLoomCompactButtonStyle}"
+                            Click="ProjectRoutes_Click"
+                            Content="Route Parts"
+                            IsEnabled="False"
+                            ToolTipService.ToolTip="编辑 Project 级 API Prefix 与 Version" />
+                        <Button
+                            x:Name="EnvironmentVariablesButton"
+                            Grid.Column="6"
+                            Style="{StaticResource ProbeLoomCompactButtonStyle}"
+                            Content="变量"
+                            IsEnabled="False"
+                            ToolTipService.ToolTip="创建和管理 Project / Environment 变量">
+                            <Button.Flyout>
+                                <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                                    <MenuFlyoutItem
+                                        Click="ProjectVariables_Click"
+                                        Icon="Folder"
+                                        Text="Project 变量…" />
+                                    <MenuFlyoutItem
+                                        x:Name="EnvironmentVariableMenuItem"
+                                        Click="EnvironmentVariables_Click"
+                                        Icon="Globe"
+                                        Text="当前 Environment 变量…" />
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+                        <Button
+                            x:Name="TokenSessionButton"
+                            Grid.Column="7"
+                            Style="{StaticResource ProbeLoomCompactButtonStyle}"
+                            Click="TokenSession_Click"
+                            Content="Token"
+                            IsEnabled="False" />
+                        <Button
+                            x:Name="RefreshTokenButton"
+                            Grid.Column="8"
+                            Style="{StaticResource ProbeLoomSubtleIconButtonStyle}"
+                            AutomationProperties.Name="刷新 Token"
+                            Click="RefreshToken_Click"
+                            Content="&#xE72C;"
+                            IsEnabled="False"
+                            ToolTipService.ToolTip="执行配置的 Refresh 请求" />
+                        <TextBox
+                            x:Name="BaseUrlTextBox"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="9"
+                            Style="{StaticResource ProbeLoomCompactTextBoxStyle}"
+                            controls:VariableDropBehavior.IsEnabled="True"
+                            AutomationProperties.Name="当前 Environment 的 Base URL"
+                            FontFamily="Cascadia Mono, Consolas"
+                            IsEnabled="False"
+                            PlaceholderText="https://api.example.com"
+                            TextChanged="BaseUrlTextBox_TextChanged" />
+                        <TextBlock
+                            x:Name="EnvironmentHintText"
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="9"
+                            Style="{StaticResource ProbeLoomCaptionStyle}"
+                            Foreground="{ThemeResource ProbeLoomDangerBrush}"
+                            Text="请创建 Environment 并配置 Base URL。"
+                            Visibility="Collapsed" />
+                    </Grid>
+                </Border>
+
+                <Grid x:Name="RequestWorkspaceGrid" Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition x:Name="InspectorSplitterColumn" Width="5" />
+                        <ColumnDefinition x:Name="InspectorColumn" Width="360" />
+                    </Grid.ColumnDefinitions>
+
+                    <controls:RequestEditorPane
+                        x:Name="RequestEditor"
+                        Grid.Column="0"
+                        FeedbackRequested="RequestEditor_FeedbackRequested"
+                        RequestChanged="RequestEditor_RequestChanged"
+                        SendRequested="RequestEditor_SendRequested"
+                        CancelRequested="RequestEditor_CancelRequested"
+                        ValidateRequested="RequestEditor_ValidateRequested" />
+
+                    <Thumb
+                        x:Name="InspectorSplitter"
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.Name="调整 Inspector 宽度"
+                        Background="Transparent"
+                        DragDelta="InspectorSplitter_DragDelta">
+                        <Thumb.Template>
+                            <ControlTemplate TargetType="Thumb">
+                                <Grid Background="Transparent">
+                                    <Border
+                                        Width="1"
+                                        HorizontalAlignment="Center"
+                                        Background="{ThemeResource ProbeLoomSoftStrokeBrush}" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Thumb.Template>
+                    </Thumb>
+
+                    <controls:InspectorPane
+                        x:Name="InspectorPane"
+                        Grid.Column="2"
+                        CollapseRequested="InspectorPane_CollapseRequested"
+                        DiagnosticsCancelRequested="InspectorPane_DiagnosticsCancelRequested"
+                        DiagnosticsRequested="InspectorPane_DiagnosticsRequested"
+                        EditRequested="InspectorPane_EditRequested"
+                        ExpandRequested="InspectorPane_ExpandRequested"
+                        FeedbackRequested="RequestEditor_FeedbackRequested"
+                        ManageVariablesRequested="InspectorPane_ManageVariablesRequested"
+                        RoutePartMoveRequested="InspectorPane_RoutePartMoveRequested" />
+                </Grid>
+
+                <controls:RouteMapPane
+                    x:Name="RouteMapPane"
+                    Grid.Row="1"
+                    EntryInvoked="RouteMapPane_EntryInvoked"
+                    RefreshRequested="RouteMapPane_RefreshRequested"
+                    Visibility="Collapsed" />
+
+                <controls:DocumentationPane
+                    x:Name="DocumentationPane"
+                    Grid.Row="1"
+                    ExportRequested="DocumentationPane_ExportRequested"
+                    MetadataChanged="DocumentationPane_MetadataChanged"
+                    Visibility="Collapsed" />
+
+                <Thumb
+                    x:Name="DiagnosticsSplitter"
+                    Grid.Row="2"
+                    VerticalAlignment="Stretch"
+                    AutomationProperties.Name="调整诊断区域高度"
+                    Background="Transparent"
+                    DragDelta="DiagnosticsSplitter_DragDelta">
+                    <Thumb.Template>
+                        <ControlTemplate TargetType="Thumb">
+                            <Grid Background="Transparent">
+                                <Border
+                                    Height="1"
+                                    VerticalAlignment="Center"
+                                    Background="{ThemeResource ProbeLoomSoftStrokeBrush}" />
+                            </Grid>
+                        </ControlTemplate>
+                    </Thumb.Template>
+                </Thumb>
+
+                <controls:DiagnosticsPane
+                    x:Name="DiagnosticsPane"
+                    Grid.Row="3"
+                    ClearHistoryRequested="DiagnosticsPane_ClearHistoryRequested" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>

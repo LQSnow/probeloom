@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="ProbeLoom.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="ProbeLoom">
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid Background="{ThemeResource ProbeLoomCanvasBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid
+            x:Name="TitleBarDragRegion"
+            Padding="12,0"
+            Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Image
+                Width="20"
+                Height="20"
+                VerticalAlignment="Center"
+                Source="Assets/AppIcon.ico" />
+            <TextBlock
+                Grid.Column="1"
+                Margin="9,0,0,0"
+                VerticalAlignment="Center"
+                FontSize="13"
+                FontWeight="SemiBold"
+                Text="ProbeLoom" />
+            <StackPanel
+                Grid.Column="2"
+                Margin="16,0,0,0"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="6">
+                <TextBlock
+                    x:Name="TitleProjectText"
+                    VerticalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="未打开项目" />
+                <TextBlock
+                    x:Name="TitleDirtyText"
+                    VerticalAlignment="Center"
+                    Foreground="{ThemeResource ProbeLoomWarningBrush}"
+                    Text="●"
+                    Visibility="Collapsed" />
+            </StackPanel>
+        </Grid>
+
+        <Frame x:Name="RootFrame" Grid.Row="1" />
+    </Grid>
+</Window>

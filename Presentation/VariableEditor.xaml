@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="ProbeLoom.Presentation.VariableEditor"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ProbeLoom.Presentation">
+    <UserControl.Resources>
+        <local:BooleanVisibilityConverter x:Key="BoolToVisibility" />
+        <local:InverseBooleanVisibilityConverter x:Key="InverseBoolToVisibility" />
+    </UserControl.Resources>
+    <Grid Width="520" MinHeight="280" MaxHeight="500" RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Spacing="2">
+                <TextBlock FontWeight="SemiBold" Text="在当前作用域创建和维护变量" />
+                <TextBlock
+                    Style="{StaticResource ProbeLoomCaptionStyle}"
+                    Text="使用 {{variable.name}} 引用；紫色输入表示已引用变量。Secret 仅保存到 Windows 安全存储。"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+            <Button
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                Style="{StaticResource ProbeLoomCompactButtonStyle}"
+                AutomationProperties.Name="新建变量"
+                Click="Add_Click"
+                Content="+ 新建" />
+        </Grid>
+        <ListView
+            x:Name="VariablesList"
+            Grid.Row="1"
+            IsItemClickEnabled="False"
+            SelectionMode="Single">
+            <ListView.Header>
+                <Grid Padding="10,0,10,4" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="28" />
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="78" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="28" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="1" Style="{StaticResource ProbeLoomCaptionStyle}" Text="名称" />
+                    <TextBlock Grid.Column="2" Style="{StaticResource ProbeLoomCaptionStyle}" Text="类型" />
+                    <TextBlock Grid.Column="3" Style="{StaticResource ProbeLoomCaptionStyle}" Text="值" />
+                </Grid>
+            </ListView.Header>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid MinHeight="38" ColumnSpacing="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="28" />
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="78" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="28" />
+                        </Grid.ColumnDefinitions>
+                        <CheckBox
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            AutomationProperties.Name="启用变量"
+                            IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
+                        <TextBox
+                            Grid.Column="1"
+                            Style="{StaticResource ProbeLoomInlineTextBoxStyle}"
+                            PlaceholderText="variable.name"
+                            Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <CheckBox
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Content="Secret"
+                            IsChecked="{Binding IsSecret, Mode=TwoWay}" />
+                        <TextBox
+                            Grid.Column="3"
+                            Style="{StaticResource ProbeLoomInlineTextBoxStyle}"
+                            local:VariableDropBehavior.IsEnabled="True"
+                            PlaceholderText="变量值，可引用其他变量"
+                            Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Visibility="{Binding IsSecret, Converter={StaticResource InverseBoolToVisibility}}" />
+                        <PasswordBox
+                            Grid.Column="3"
+                            Style="{StaticResource ProbeLoomCompactPasswordBoxStyle}"
+                            AutomationProperties.Name="Secret 变量值"
+                            Password="{Binding Value, Mode=TwoWay}"
+                            PasswordRevealMode="Peek"
+                            PlaceholderText="安全值"
+                            Visibility="{Binding IsSecret, Converter={StaticResource BoolToVisibility}}" />
+                        <Button
+                            Grid.Column="4"
+                            Style="{StaticResource ProbeLoomSubtleIconButtonStyle}"
+                            AutomationProperties.Name="删除变量"
+                            Click="Delete_Click"
+                            Content="&#xE74D;" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <StackPanel
+            x:Name="EmptyState"
+            Grid.Row="1"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            IsHitTestVisible="False"
+            Spacing="5">
+            <FontIcon HorizontalAlignment="Center" FontSize="24" Glyph="&#xE8EF;" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+            <TextBlock HorizontalAlignment="Center" FontWeight="SemiBold" Text="此作用域还没有变量" />
+            <TextBlock Style="{StaticResource ProbeLoomCaptionStyle}" Text="点击右上角“新建变量”开始创建。" />
+        </StackPanel>
+    </Grid>
+</UserControl>
